@@ -1,0 +1,22 @@
+﻿using System;
+
+namespace Weather.DTO
+{
+    public enum City { Sydney, London, Brussels, Rio, Prague }
+    public enum WeatherType { Sunny, Cloudy, Fog, Rain, Lightning, Windy };
+
+    public class WeatherRecord
+    {
+        public City City { get; set; }
+
+        public int GmtOffSet{ get; set; }
+
+        public WeatherType WeatherType { get; set; }
+
+        public int Temperature { get; set; }
+
+        public int Humidity { get; set; }
+
+        public int WindSpeed { get; set; }
+    }
+}

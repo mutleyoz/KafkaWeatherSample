@@ -1,0 +1,15 @@
+﻿{ 
+  "namespace": "Weather.DTO",
+  "type": "record",
+  "doc": "A record of weather event related to a city",
+  "name": "WeatherRecord",
+  "fields": [
+    {
+     { "name": "City", "type": "string" },
+     { "name": "GmtOffset", "type": "int" },
+     { "name": "WeatherType", "type": "string" },
+     { "name": "Temperature", "type": "int" },
+     { "name": "Humidity", "type": "int" },
+     { "name": "WindSpeed", "type": "int" }
+  ]
+}
