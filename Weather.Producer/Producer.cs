@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using Confluent.SchemaRegistry.Serdes;
 using Confluent.SchemaRegistry;
 using Avro;
+using Weather.DTO;
+using System;
 
 namespace Weather.Producer
 {
@@ -23,7 +25,7 @@ namespace Weather.Producer
             _logger = logger;
         }
 
-        public async void Send(string topic, T payload)
+        public void Send(string topic, T payload)
         {
             var schemaRegistryConfig = new SchemaRegistryConfig
             {
@@ -36,26 +38,38 @@ namespace Weather.Producer
             };
 
             using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
-            {
-                using (var producer = new ProducerBuilder<Null, T>(_config)
-                    .SetValueSerializer(new AvroSerializer<T>(schemaRegistry, avroSerializerConfig))
+            using (var producer =
+                new ProducerBuilder<string, WeatherRecord>(_config)
+                    .SetKeySerializer(new AvroSerializer<string>(schemaRegistry, avroSerializerConfig))
+                    .SetValueSerializer(new AvroSerializer<WeatherRecord>(schemaRegistry, avroSerializerConfig))
                     .Build())
-                {
-                    _logger.LogInformation($"Sending message to topic");
+            {
+                _logger.LogInformation($"{producer.Name} producing on {topic}.");
 
-                    await producer.ProduceAsync("weather", new Message<Null, T> { Value = payload })
-                         .ContinueWith(task =>
-                         {
-                             if (task.IsFaulted)
-                             {
-                                 _logger.LogError($"Broker faulted : {task.Exception.Message}");
-                             }
-                             else
-                             {
-                                 _logger.LogInformation($"Wrote to offset: {task.Result.Offset}.");
-                             }
-                         });
-  
+                int i = 0;
+                string text;
+                while ((text = Console.ReadLine()) != "q")
+                {
+                    //var WeatherRecord = new WeatherRecord { ID = i++, Firstname = text, Lastname = "Smithy", BirthDate = "02/12/45"};
+                    WeatherRecord weatherRecord = new WeatherRecord { City = WeatherCities.Sydney, GmtOffset = 10, Type = WeatherTypes.Rainy, Temperature = 23, Humidity = 100, WindSpeed = 23 };
+                    producer
+                        .ProduceAsync(topic, new Message<string, WeatherRecord> { Key = text, Value = weatherRecord })
+                        .ContinueWith(task =>
+                        {
+                            if (!task.IsFaulted)
+                            {
+                                Console.WriteLine($"produced to: {task.Result.TopicPartitionOffset}");
+                            }
+
+                            // Task.Exception is of type AggregateException. Use the InnerException property
+                            // to get the underlying ProduceException. In some cases (notably Schema Registry
+                            // connectivity issues), the InnerException of the ProduceException will contain
+                            // additional information pertaining to the root cause of the problem. Note: this
+                            // information is automatically included in the output of the ToString() method of
+                            // the ProduceException which is called implicitly in the below.
+                            Console.WriteLine($"error producing message: {task.Exception.InnerException}");
+                        });
+
                 }
             }
         }
