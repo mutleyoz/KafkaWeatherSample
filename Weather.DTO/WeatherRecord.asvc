@@ -19,6 +19,10 @@
       "type": [ "int", "null" ]
     },
     {
+      "name": "DateTime",
+      "type": [ "string", "null"]
+    },
+    {
       "name": "Type",
       "type": {
         "namespace": "Weather.DTO",

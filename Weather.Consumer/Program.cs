@@ -4,7 +4,6 @@ using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Weather.DTO;
 
 namespace Weather.Consumer
@@ -15,8 +14,8 @@ namespace Weather.Consumer
         {
             var consumerConfig = new ConsumerConfig
             {
-                BootstrapServers = "localhost:29092",
-                GroupId = "weather_group",
+                BootstrapServers = "localhost:9092",
+                GroupId = "sc-consumer-grp",
                 AllowAutoCreateTopics = true
             };
 
@@ -28,7 +27,7 @@ namespace Weather.Consumer
 
             var schemaRegistryConfig = new SchemaRegistryConfig
             {
-                Url = "localhost:8090"
+                Url = "localhost:8081"
 
             };
 
@@ -42,7 +41,7 @@ namespace Weather.Consumer
                     .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                     .Build())
             {
-                consumer.Subscribe("weather");
+                consumer.Subscribe("weatherrecord.V2");
 
                 try
                 {
@@ -51,7 +50,7 @@ namespace Weather.Consumer
                         try
                         {
                             var consumeResult = consumer.Consume(cts.Token);
-                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, favorite color: {consumeResult.Message.Value}");
+                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, DateTime: {consumeResult.Message.Value.DateTime}, City: {consumeResult.Message.Value.City}, Type: {consumeResult.Message.Value.Type}");
                         }
                         catch (ConsumeException e)
                         {
