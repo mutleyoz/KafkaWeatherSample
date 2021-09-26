@@ -1,15 +1,44 @@
-﻿{ 
+﻿{
   "namespace": "Weather.DTO",
   "type": "record",
   "doc": "A record of weather event related to a city",
   "name": "WeatherRecord",
   "fields": [
     {
-     { "name": "City", "type": "string" },
-     { "name": "GmtOffset", "type": "int" },
-     { "name": "WeatherType", "type": "string" },
-     { "name": "Temperature", "type": "int" },
-     { "name": "Humidity", "type": "int" },
-     { "name": "WindSpeed", "type": "int" }
+      "name": "City",
+      "type": {
+        "namespace": "Weather.DTO",
+        "type": "enum",
+        "doc": "City names",
+        "name": "WeatherCities",
+        "symbols": [ "Sydney", "Montreal", "Zagreb", "Chicago", "London" ]
+      }
+    },
+    {
+      "name": "GmtOffset",
+      "type": [ "int", "null" ]
+    },
+    {
+      "name": "Type",
+      "type": {
+        "namespace": "Weather.DTO",
+        "type": "enum",
+        "doc": "Weather types",
+        "name": "WeatherTypes",
+        "symbols": [ "Rainy", "Sunny", "Snow", "Mixed", "Overcast" ]
+      }
+    },
+    {
+      "name": "Temperature",
+      "type": [ "int", "null" ]
+    },
+    {
+      "name": "Humidity",
+      "type": [ "int", "null" ]
+    },
+    {
+      "name": "WindSpeed",
+      "type": [ "int", "null" ]
+    }
   ]
 }

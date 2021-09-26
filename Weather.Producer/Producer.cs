@@ -27,7 +27,7 @@ namespace Weather.Producer
         {
             var schemaRegistryConfig = new SchemaRegistryConfig
             {
-                Url = "localhost:8090"
+                Url = "localhost:8081"
             };
 
             var avroSerializerConfig = new AvroSerializerConfig
@@ -37,14 +37,13 @@ namespace Weather.Producer
 
             using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
             {
-                using (var producer = new ProducerBuilder<string, T>(_config)
-                    .SetKeySerializer(new AvroSerializer<string>(schemaRegistry, avroSerializerConfig))
+                using (var producer = new ProducerBuilder<Null, T>(_config)
                     .SetValueSerializer(new AvroSerializer<T>(schemaRegistry, avroSerializerConfig))
                     .Build())
                 {
                     _logger.LogInformation($"Sending message to topic");
 
-                    await producer.ProduceAsync("weather", new Message<string, T> { Key = "weather_message", Value = payload })
+                    await producer.ProduceAsync("weather", new Message<Null, T> { Value = payload })
                          .ContinueWith(task =>
                          {
                              if (task.IsFaulted)

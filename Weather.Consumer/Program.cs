@@ -5,6 +5,7 @@ using Confluent.SchemaRegistry.Serdes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Weather.DTO;
 
 namespace Weather.Consumer
 {
@@ -35,9 +36,9 @@ namespace Weather.Consumer
 
             using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
             using (var consumer =
-                new ConsumerBuilder<string, DTO.Weather>(consumerConfig)
+                new ConsumerBuilder<string, WeatherRecord>(consumerConfig)
                     .SetKeyDeserializer(new AvroDeserializer<string>(schemaRegistry).AsSyncOverAsync())
-                    .SetValueDeserializer(new AvroDeserializer<DTO.Weather>(schemaRegistry).AsSyncOverAsync())
+                    .SetValueDeserializer(new AvroDeserializer<WeatherRecord>(schemaRegistry).AsSyncOverAsync())
                     .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                     .Build())
             {

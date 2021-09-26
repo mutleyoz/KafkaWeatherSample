@@ -14,15 +14,14 @@ namespace Weather.DTO
 	using Avro.Specific;
 	
 	/// <summary>
-	/// Available weathers for each location
+	/// Weather types
 	/// </summary>
-	public enum Weather
+	public enum WeatherTypes
 	{
+		Rainy,
 		Sunny,
-		Cloudy,
-		Fog,
-		Rain,
-		Lightning,
-		Windy,
+		Snow,
+		Mixed,
+		Overcast,
 	}
 }

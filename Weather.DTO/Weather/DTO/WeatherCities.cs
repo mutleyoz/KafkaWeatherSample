@@ -14,14 +14,14 @@ namespace Weather.DTO
 	using Avro.Specific;
 	
 	/// <summary>
-	/// Available cities for weather forecasts
+	/// City names
 	/// </summary>
-	public enum CityName
+	public enum WeatherCities
 	{
 		Sydney,
+		Montreal,
+		Zagreb,
+		Chicago,
 		London,
-		Brussels,
-		Rio,
-		Prague,
 	}
 }

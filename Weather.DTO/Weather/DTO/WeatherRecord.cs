@@ -18,13 +18,13 @@ namespace Weather.DTO
 	/// </summary>
 	public partial class WeatherRecord : ISpecificRecord
 	{
-		public static Schema _SCHEMA = Avro.Schema.Parse(@"{""type"":""record"",""name"":""WeatherRecord"",""namespace"":""Weather.DTO"",""fields"":[{""name"":""City"",""type"":{""type"":""enum"",""name"":""CityName"",""namespace"":""Weather.DTO"",""symbols"":[""Sydney"",""London"",""Brussels"",""Rio"",""Prague""]}},{""name"":""GmtOffset"",""type"":""int""},{""name"":""WeatherType"",""type"":{""type"":""enum"",""name"":""Weather"",""namespace"":""Weather.DTO"",""symbols"":[""Sunny"",""Cloudy"",""Fog"",""Rain"",""Lightning"",""Windy""]}},{""name"":""Temperature"",""type"":""int""},{""name"":""Humidity"",""type"":""int""},{""name"":""WindSpeed"",""type"":""int""}]}");
-		private CityName _City;
-		private int _GmtOffset;
-		private Weather _WeatherType;
-		private int _Temperature;
-		private int _Humidity;
-		private int _WindSpeed;
+		public static Schema _SCHEMA = Avro.Schema.Parse(@"{""type"":""record"",""name"":""WeatherRecord"",""namespace"":""Weather.DTO"",""fields"":[{""name"":""City"",""type"":{""type"":""enum"",""name"":""WeatherCities"",""namespace"":""Weather.DTO"",""symbols"":[""Sydney"",""Montreal"",""Zagreb"",""Chicago"",""London""]}},{""name"":""GmtOffset"",""type"":[""int"",""null""]},{""name"":""Type"",""type"":{""type"":""enum"",""name"":""WeatherTypes"",""namespace"":""Weather.DTO"",""symbols"":[""Rainy"",""Sunny"",""Snow"",""Mixed"",""Overcast""]}},{""name"":""Temperature"",""type"":[""int"",""null""]},{""name"":""Humidity"",""type"":[""int"",""null""]},{""name"":""WindSpeed"",""type"":[""int"",""null""]}]}");
+		private Weather.DTO.WeatherCities _City;
+		private System.Nullable<System.Int32> _GmtOffset;
+		private Weather.DTO.WeatherTypes _Type;
+		private System.Nullable<System.Int32> _Temperature;
+		private System.Nullable<System.Int32> _Humidity;
+		private System.Nullable<System.Int32> _WindSpeed;
 		public virtual Schema Schema
 		{
 			get
@@ -32,7 +32,7 @@ namespace Weather.DTO
 				return WeatherRecord._SCHEMA;
 			}
 		}
-		public CityName City
+		public Weather.DTO.WeatherCities City
 		{
 			get
 			{
@@ -43,7 +43,7 @@ namespace Weather.DTO
 				this._City = value;
 			}
 		}
-		public int GmtOffset
+		public System.Nullable<System.Int32> GmtOffset
 		{
 			get
 			{
@@ -54,18 +54,18 @@ namespace Weather.DTO
 				this._GmtOffset = value;
 			}
 		}
-		public Weather WeatherType
+		public Weather.DTO.WeatherTypes Type
 		{
 			get
 			{
-				return this._WeatherType;
+				return this._Type;
 			}
 			set
 			{
-				this._WeatherType = value;
+				this._Type = value;
 			}
 		}
-		public int Temperature
+		public System.Nullable<System.Int32> Temperature
 		{
 			get
 			{
@@ -76,7 +76,7 @@ namespace Weather.DTO
 				this._Temperature = value;
 			}
 		}
-		public int Humidity
+		public System.Nullable<System.Int32> Humidity
 		{
 			get
 			{
@@ -87,7 +87,7 @@ namespace Weather.DTO
 				this._Humidity = value;
 			}
 		}
-		public int WindSpeed
+		public System.Nullable<System.Int32> WindSpeed
 		{
 			get
 			{
@@ -104,7 +104,7 @@ namespace Weather.DTO
 			{
 			case 0: return this.City;
 			case 1: return this.GmtOffset;
-			case 2: return this.WeatherType;
+			case 2: return this.Type;
 			case 3: return this.Temperature;
 			case 4: return this.Humidity;
 			case 5: return this.WindSpeed;
@@ -115,12 +115,12 @@ namespace Weather.DTO
 		{
 			switch (fieldPos)
 			{
-			case 0: this.City = (CityName)fieldValue; break;
-			case 1: this.GmtOffset = (System.Int32)fieldValue; break;
-			case 2: this.WeatherType = (Weather)fieldValue; break;
-			case 3: this.Temperature = (System.Int32)fieldValue; break;
-			case 4: this.Humidity = (System.Int32)fieldValue; break;
-			case 5: this.WindSpeed = (System.Int32)fieldValue; break;
+			case 0: this.City = (Weather.DTO.WeatherCities)fieldValue; break;
+			case 1: this.GmtOffset = (System.Nullable<System.Int32>)fieldValue; break;
+			case 2: this.Type = (Weather.DTO.WeatherTypes)fieldValue; break;
+			case 3: this.Temperature = (System.Nullable<System.Int32>)fieldValue; break;
+			case 4: this.Humidity = (System.Nullable<System.Int32>)fieldValue; break;
+			case 5: this.WindSpeed = (System.Nullable<System.Int32>)fieldValue; break;
 			default: throw new AvroRuntimeException("Bad index " + fieldPos + " in Put()");
 			};
 		}
