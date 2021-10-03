@@ -35,13 +35,13 @@ namespace Weather.Consumer
 
             using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
             using (var consumer =
-                new ConsumerBuilder<string, User.DTO.User>(consumerConfig)
+                new ConsumerBuilder<string, WeatherRecord>(consumerConfig)
                     .SetKeyDeserializer(new AvroDeserializer<string>(schemaRegistry).AsSyncOverAsync())
-                    .SetValueDeserializer(new AvroDeserializer<User.DTO.User>(schemaRegistry).AsSyncOverAsync())
+                    .SetValueDeserializer(new AvroDeserializer<WeatherRecord>(schemaRegistry).AsSyncOverAsync())
                     .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                     .Build())
             {
-                consumer.Subscribe("test");
+                consumer.Subscribe("weather");
 
                 try
                 {
@@ -50,7 +50,7 @@ namespace Weather.Consumer
                         try
                         {
                             var consumeResult = consumer.Consume(cts.Token);
-                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, DateTime: {consumeResult.Message.Value.name}, City: {consumeResult.Message.Value.favorite_number}, Type: {consumeResult.Message.Value.favorite_color}");
+                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, DateTime: {consumeResult.Message.Value.DateTime}, City: {consumeResult.Message.Value.City}, Type: {consumeResult.Message.Value.Type}");
                         }
                         catch (ConsumeException e)
                         {

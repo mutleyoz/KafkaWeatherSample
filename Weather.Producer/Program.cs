@@ -32,9 +32,9 @@ namespace Weather.Producer
 
             using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
             using (var producer =
-                new ProducerBuilder<string, User.DTO.User>(producerConfig)
+                new ProducerBuilder<string, WeatherRecord>(producerConfig)
                     .SetKeySerializer(new AvroSerializer<string>(schemaRegistry, avroSerializerConfig))
-                    .SetValueSerializer(new AvroSerializer<User.DTO.User>(schemaRegistry, avroSerializerConfig))
+                    .SetValueSerializer(new AvroSerializer<WeatherRecord>(schemaRegistry, avroSerializerConfig))
                     .Build())
             {
                 Console.WriteLine($"{producer.Name} producing on 'test'. Enter user names, q to exit.");
@@ -43,9 +43,9 @@ namespace Weather.Producer
                 string text;
                 while ((text = Console.ReadLine()) != "q")
                 {
-                    User.DTO.User user = new User.DTO.User { name = text, favorite_color = "green", favorite_number = i++, hourly_rate = new Avro.AvroDecimal(67.99) };
+                    var weather = new WeatherRecord { DateTime = DateTime.Now.ToLongTimeString(), City = WeatherCities.Sydney, GmtOffset = 10, Temperature = 23, Type = WeatherTypes.Rainy, WindSpeed = 20 };
                     producer
-                        .ProduceAsync("test", new Message<string, User.DTO.User> { Key = text, Value = user })
+                        .ProduceAsync("weather", new Message<string, WeatherRecord> { Key = text, Value = weather })
                         .ContinueWith(task =>
                         {
                             if (!task.IsFaulted)
