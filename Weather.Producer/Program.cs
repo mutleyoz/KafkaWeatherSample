@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -30,7 +31,19 @@ namespace Weather.Producer
                 BufferBytes = 100
             };
 
-            using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
+            var client = new KafkaClient(schemaRegistryConfig, producerConfig);
+
+            string text = "";
+            while ((text = Console.ReadLine()) != "q")
+            {
+                var weather = new WeatherRecord { DateTime = DateTime.Now.ToLongTimeString(), City = WeatherCities.Sydney, GmtOffset = 10, Temperature = 23, Type = WeatherTypes.Rainy, WindSpeed = 20 };
+
+                client.Producer.Send("weather", text , weather);
+
+            }
+
+
+  /*          using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
             using (var producer =
                 new ProducerBuilder<string, WeatherRecord>(producerConfig)
                     .SetKeySerializer(new AvroSerializer<string>(schemaRegistry, avroSerializerConfig))
@@ -66,7 +79,7 @@ namespace Weather.Producer
                            
                         });
                 }
-            }
+            }*/
         }
     }
 }
