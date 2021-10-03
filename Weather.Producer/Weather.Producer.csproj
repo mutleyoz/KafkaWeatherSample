@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avro" Version="1.0.0" />
     <PackageReference Include="Confluent.Kafka" Version="1.8.1" />
     <PackageReference Include="Confluent.SchemaRegistry" Version="1.8.1" />
     <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="1.8.1" />

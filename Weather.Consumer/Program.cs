@@ -19,29 +19,29 @@ namespace Weather.Consumer
                 AllowAutoCreateTopics = true
             };
 
+            var schemaRegistryConfig = new SchemaRegistryConfig
+            {
+                Url = "localhost:8081"
+            };
+
             var avroSerializerConfig = new AvroSerializerConfig
             {
                 // optional Avro serializer properties:
                 BufferBytes = 100
             };
 
-            var schemaRegistryConfig = new SchemaRegistryConfig
-            {
-                Url = "localhost:8081"
-
-            };
 
             CancellationTokenSource cts = new CancellationTokenSource();
 
             using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
             using (var consumer =
-                new ConsumerBuilder<string, WeatherRecord>(consumerConfig)
+                new ConsumerBuilder<string, User.DTO.User>(consumerConfig)
                     .SetKeyDeserializer(new AvroDeserializer<string>(schemaRegistry).AsSyncOverAsync())
-                    .SetValueDeserializer(new AvroDeserializer<WeatherRecord>(schemaRegistry).AsSyncOverAsync())
+                    .SetValueDeserializer(new AvroDeserializer<User.DTO.User>(schemaRegistry).AsSyncOverAsync())
                     .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
                     .Build())
             {
-                consumer.Subscribe("weatherrecord.V2");
+                consumer.Subscribe("test");
 
                 try
                 {
@@ -50,7 +50,7 @@ namespace Weather.Consumer
                         try
                         {
                             var consumeResult = consumer.Consume(cts.Token);
-                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, DateTime: {consumeResult.Message.Value.DateTime}, City: {consumeResult.Message.Value.City}, Type: {consumeResult.Message.Value.Type}");
+                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, DateTime: {consumeResult.Message.Value.name}, City: {consumeResult.Message.Value.favorite_number}, Type: {consumeResult.Message.Value.favorite_color}");
                         }
                         catch (ConsumeException e)
                         {
@@ -64,6 +64,7 @@ namespace Weather.Consumer
                 }
                 finally
                 {
+                    cts.Cancel();
                     consumer.Close();
                 }
             }
