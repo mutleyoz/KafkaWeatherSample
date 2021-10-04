@@ -16,21 +16,11 @@ namespace Weather.Producer
     {
         static void Main(string[] args)
         {
-            var producerConfig = new ProducerConfig
-            {
-                BootstrapServers = "localhost:9092"
-            };
+            var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
-            var schemaRegistryConfig = new SchemaRegistryConfig
-            {
-                Url = "localhost:8081"
-            };
+            var schemaRegistryConfig = new SchemaRegistryConfig { Url = "localhost:8081" };
 
-            var avroSerializerConfig = new AvroSerializerConfig
-            {
-                // optional Avro serializer properties:
-                BufferBytes = 100
-            };
+            var avroSerializerConfig = new AvroSerializerConfig { BufferBytes = 100 };
 
             var client = new KafkaClient(schemaRegistryConfig, producerConfig);
             while (true)
@@ -46,7 +36,7 @@ namespace Weather.Producer
                     };
 
                 client.Producer.Send("weather", "weatherrecord", weather);
-                Thread.Sleep(500);
+                Thread.Sleep(100);
             }
         }
 

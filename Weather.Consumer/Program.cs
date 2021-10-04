@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using Weather.DTO;
 using System.Text.Json;
+using Infrastructure;
 
 namespace Weather.Consumer
 {
@@ -31,46 +32,14 @@ namespace Weather.Consumer
                 BufferBytes = 100
             };
 
-
             CancellationTokenSource cts = new CancellationTokenSource();
 
-            using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
-            using (var consumer =
-                new ConsumerBuilder<string, WeatherRecord>(consumerConfig)
-                    .SetKeyDeserializer(new AvroDeserializer<string>(schemaRegistry).AsSyncOverAsync())
-                    .SetValueDeserializer(new AvroDeserializer<WeatherRecord>(schemaRegistry).AsSyncOverAsync())
-                    .SetErrorHandler((_, e) => Console.WriteLine($"Error: {e.Reason}"))
-                    .Build())
+            var kafkaClient = new KafkaClient(schemaRegistryConfig, null, consumerConfig);
+            kafkaClient.Consumer.Subscribe("weather").Listen(cts, msg =>
             {
-                consumer.Subscribe("weather");
-
-                try
-                {
-                    while (true)
-                    {
-                        try
-                        {
-                            var consumeResult = consumer.Consume(cts.Token);
-                            var serializedResult = JsonSerializer.Serialize(consumeResult.Message.Value);
-
-                            Console.WriteLine(serializedResult);
-                        }
-                        catch (ConsumeException e)
-                        {
-                            Console.WriteLine($"Consume error: {e.Error.Reason}");
-                        }
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    Console.WriteLine("Operation cancelled.");
-                }
-                finally
-                {
-                    cts.Cancel();
-                    consumer.Close();
-                }
-            }
+                var serializedResult = JsonSerializer.Serialize(msg);
+                Console.WriteLine(serializedResult);
+            });
         }
     }
 }
