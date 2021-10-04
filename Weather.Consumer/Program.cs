@@ -5,6 +5,7 @@ using Confluent.SchemaRegistry.Serdes;
 using System;
 using System.Threading;
 using Weather.DTO;
+using System.Text.Json;
 
 namespace Weather.Consumer
 {
@@ -50,7 +51,9 @@ namespace Weather.Consumer
                         try
                         {
                             var consumeResult = consumer.Consume(cts.Token);
-                            Console.WriteLine($"weather key: {consumeResult.Message.Key}, DateTime: {consumeResult.Message.Value.DateTime}, City: {consumeResult.Message.Value.City}, Type: {consumeResult.Message.Value.Type}");
+                            var serializedResult = JsonSerializer.Serialize(consumeResult.Message.Value);
+
+                            Console.WriteLine(serializedResult);
                         }
                         catch (ConsumeException e)
                         {

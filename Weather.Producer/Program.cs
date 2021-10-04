@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
+using System.Threading;
 using Weather.DTO;
 
 
@@ -32,53 +33,27 @@ namespace Weather.Producer
             };
 
             var client = new KafkaClient(schemaRegistryConfig, producerConfig);
-
-            string text = "";
-            while ((text = Console.ReadLine()) != "q")
+            while (true)
             {
-                var weather = new WeatherRecord { DateTime = DateTime.Now.ToLongTimeString(), City = WeatherCities.Sydney, GmtOffset = 10, Temperature = 23, Type = WeatherTypes.Rainy, WindSpeed = 20 };
+                var weather = new WeatherRecord 
+                    { 
+                        DateTime = DateTime.Now.ToLongTimeString(), 
+                        City = (WeatherCities)GetRandom(0, 4), 
+                        GmtOffset = 10, 
+                        Temperature = GetRandom(5, 40), 
+                        Type = (WeatherTypes) GetRandom(0, 4), 
+                        WindSpeed = GetRandom(0, 40) 
+                    };
 
-                client.Producer.Send("weather", text, weather);
+                client.Producer.Send("weather", "weatherrecord", weather);
+                Thread.Sleep(500);
             }
+        }
 
-
-            /*            using (var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig))
-                        using (var producer =
-                            new ProducerBuilder<string, WeatherRecord>(producerConfig)
-                                .SetKeySerializer(new AvroSerializer<string>(schemaRegistry, avroSerializerConfig))
-                                .SetValueSerializer(new AvroSerializer<WeatherRecord>(schemaRegistry, avroSerializerConfig))
-                                .Build())
-                        {
-                            Console.WriteLine($"{producer.Name} producing on 'test'. Enter user names, q to exit.");
-
-                            int i = 0;
-                            string text;
-                            while ((text = Console.ReadLine()) != "q")
-                            {
-                                var weather = new WeatherRecord { DateTime = DateTime.Now.ToLongTimeString(), City = WeatherCities.Sydney, GmtOffset = 10, Temperature = 23, Type = WeatherTypes.Rainy, WindSpeed = 20 };
-                                producer
-                                    .ProduceAsync("weather", new Message<string, WeatherRecord> { Key = text, Value = weather })
-                                    .ContinueWith(task =>
-                                    {
-                                        if (!task.IsFaulted)
-                                        {
-                                            Console.WriteLine($"produced to: {task.Result.TopicPartitionOffset}");
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine($"error producing message: {task.Exception.InnerException}");
-                                        }
-
-                                        // Task.Exception is of type AggregateException. Use the InnerException property
-                                        // to get the underlying ProduceException. In some cases (notably Schema Registry
-                                        // connectivity issues), the InnerException of the ProduceException will contain
-                                        // additional information pertaining to the root cause of the problem. Note: this
-                                        // information is automatically included in the output of the ToString() method of
-                                        // the ProduceException which is called implicitly in the below.
-
-                                    });
-                            }
-                        }*/
+        private static int GetRandom(int lower, int higher)
+        {
+            var randomiser = new Random(DateTime.Now.Millisecond);
+            return randomiser.Next(lower, higher);
         }
     }
 }
