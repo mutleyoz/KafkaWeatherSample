@@ -4,41 +4,38 @@ using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using System;
 using System.Threading;
-using Weather.DTO;
 
 namespace Infrastructure
 {
-    public class KafkaConsumer : IDisposable
+    public class KafkaConsumer<T> : IDisposable where T : class
     {
         private SchemaRegistryConfig _schemaRegistryConfig;
         private ISchemaRegistryClient _schemaRegistryClient;
         private ConsumerConfig _consumerConfig;
-        private AvroSerializerConfig _avroSerializerConfig;
-        private IConsumer<string, WeatherRecord> _consumer;
+        private IConsumer<string, T> _consumer;
 
         public KafkaConsumer(SchemaRegistryConfig schemaRegistryConfig, ConsumerConfig consumerConfig)
         {
             _schemaRegistryConfig = schemaRegistryConfig;
             _consumerConfig = consumerConfig;
-            _avroSerializerConfig = new AvroSerializerConfig { BufferBytes = 100 };
             _schemaRegistryClient = new CachedSchemaRegistryClient(_schemaRegistryConfig);
 
             _consumer =
-                new ConsumerBuilder<string, WeatherRecord>(_consumerConfig)
-                    .SetKeyDeserializer(new AvroDeserializer<string>(_schemaRegistryClient, _avroSerializerConfig).AsSyncOverAsync())
-                    .SetValueDeserializer(new AvroDeserializer<WeatherRecord>(_schemaRegistryClient, _avroSerializerConfig).AsSyncOverAsync())
+                new ConsumerBuilder<string, T>(_consumerConfig)
+                    .SetKeyDeserializer(new AvroDeserializer<string>(_schemaRegistryClient).AsSyncOverAsync())
+                    .SetValueDeserializer(new AvroDeserializer<T>(_schemaRegistryClient).AsSyncOverAsync())
                     .SetErrorHandler((_, e) => Console.WriteLine($"Consumer Error: {e.Reason}"))
                     .Build();
         }
 
-        public KafkaConsumer Subscribe(string topic)
+        public KafkaConsumer<T> Subscribe(string topic)
         {
             _consumer.Subscribe(topic);
             return (this);
         }
 
 
-        public void Listen(CancellationTokenSource cts, Action<WeatherRecord> consumeEvent)
+        public void Listen(CancellationTokenSource cts, Action<T> consumeEvent)
         {
             while (true)
             {
@@ -49,6 +46,7 @@ namespace Infrastructure
                 }
             }
         }
+
         public void Dispose()
         {
             _schemaRegistryClient.Dispose();

@@ -34,7 +34,7 @@ namespace Weather.Consumer
 
             CancellationTokenSource cts = new CancellationTokenSource();
 
-            var kafkaClient = new KafkaClient(schemaRegistryConfig, null, consumerConfig);
+            var kafkaClient = new KafkaClient<WeatherRecord>(schemaRegistryConfig, null, consumerConfig);
             kafkaClient.Consumer.Subscribe("weather").Listen(cts, msg =>
             {
                 var serializedResult = JsonSerializer.Serialize(msg);

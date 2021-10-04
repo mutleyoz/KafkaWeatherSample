@@ -17,26 +17,25 @@ namespace Weather.Producer
         static void Main(string[] args)
         {
             var producerConfig = new ProducerConfig { BootstrapServers = "localhost:9092" };
-
             var schemaRegistryConfig = new SchemaRegistryConfig { Url = "localhost:8081" };
 
-            var avroSerializerConfig = new AvroSerializerConfig { BufferBytes = 100 };
-
-            var client = new KafkaClient(schemaRegistryConfig, producerConfig);
-            while (true)
+            using (var client = new KafkaClient<WeatherRecord>(schemaRegistryConfig, producerConfig))
             {
-                var weather = new WeatherRecord 
-                    { 
-                        DateTime = DateTime.Now.ToLongTimeString(), 
-                        City = (WeatherCities)GetRandom(0, 4), 
-                        GmtOffset = 10, 
-                        Temperature = GetRandom(5, 40), 
-                        Type = (WeatherTypes) GetRandom(0, 4), 
-                        WindSpeed = GetRandom(0, 40) 
+                while (true)
+                {
+                    var weather = new WeatherRecord
+                    {
+                        DateTime = DateTime.Now.ToLongTimeString(),
+                        City = (WeatherCities)GetRandom(0, 4),
+                        GmtOffset = 10,
+                        Temperature = GetRandom(5, 40),
+                        Type = (WeatherTypes)GetRandom(0, 4),
+                        WindSpeed = GetRandom(0, 40)
                     };
 
-                client.Producer.Send("weather", "weatherrecord", weather);
-                Thread.Sleep(100);
+                    client.Producer.Send("weather", "weatherrecord", weather);
+                    Thread.Sleep(100);
+                }
             }
         }
 

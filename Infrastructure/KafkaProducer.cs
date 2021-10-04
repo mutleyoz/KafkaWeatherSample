@@ -6,14 +6,14 @@ using Weather.DTO;
 
 namespace Infrastructure
 {
-    public class KafkaProducer : IDisposable
+    public class KafkaProducer<T> : IDisposable where T : class
     {
         private SchemaRegistryConfig _schemaRegistryConfig;
         private ISchemaRegistryClient _schemaRegistryClient;
 
         private ProducerConfig _producerConfig;
         private AvroSerializerConfig _avroSerializerConfig;
-        private IProducer<string, WeatherRecord> _producer;
+        private IProducer<string, T> _producer;
 
 
         public KafkaProducer(SchemaRegistryConfig schemaRegistryConfig, ProducerConfig producerConfig )
@@ -21,18 +21,14 @@ namespace Infrastructure
             _schemaRegistryConfig = schemaRegistryConfig;
             _producerConfig = producerConfig;
 
-            _avroSerializerConfig = new AvroSerializerConfig
-            {
-                // optional Avro serializer properties:
-                BufferBytes = 100
-            };
+            _avroSerializerConfig = new AvroSerializerConfig {BufferBytes = 100 };
 
             _schemaRegistryClient = new CachedSchemaRegistryClient(schemaRegistryConfig);
 
             _producer =
-                new ProducerBuilder<string, WeatherRecord>(_producerConfig)
+                new ProducerBuilder<string, T>(_producerConfig)
                     .SetKeySerializer(new AvroSerializer<string>(_schemaRegistryClient, _avroSerializerConfig))
-                    .SetValueSerializer(new AvroSerializer<WeatherRecord>(_schemaRegistryClient, _avroSerializerConfig))
+                    .SetValueSerializer(new AvroSerializer<T>(_schemaRegistryClient, _avroSerializerConfig))
                     .Build();
         }
 
@@ -42,10 +38,10 @@ namespace Infrastructure
             _producer.Dispose();
         }
 
-        public void Send(string topic, string key, WeatherRecord weather)
+        public void Send(string topic, string key, T message)
         {
             _producer
-                    .ProduceAsync(topic, new Message<string, WeatherRecord> { Key = key, Value = weather })
+                    .ProduceAsync(topic, new Message<string, T> { Key = key, Value = message })
                     .ContinueWith(task =>
                     {
                         if (!task.IsFaulted)

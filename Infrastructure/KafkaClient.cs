@@ -4,24 +4,23 @@ using System;
 
 namespace Infrastructure
 {
-
-    public class KafkaClient: IDisposable
+    public class KafkaClient<T> : IDisposable where T : class
     {
         private readonly SchemaRegistryConfig _schemaRegistryConfig;
         private readonly ProducerConfig _producerConfig;
         private readonly ConsumerConfig _consumerConfig;
 
-        public KafkaConsumer Consumer { get; set; }
-        public KafkaProducer Producer { get; init; }
+        public KafkaConsumer<T> Consumer { get; set; }
+        public KafkaProducer<T> Producer { get; init; }
 
         public KafkaClient(SchemaRegistryConfig schemaRegistryConfig, ProducerConfig producerConfig = null, ConsumerConfig consumerConfig = null)
         {
             _schemaRegistryConfig = schemaRegistryConfig ?? new SchemaRegistryConfig { Url = "localhost:8081" };
-            _producerConfig = producerConfig ?? new ProducerConfig { BootstrapServers = "localhost:9092" };
-            _consumerConfig = consumerConfig ?? new ConsumerConfig { BootstrapServers = "localhost:9092", GroupId = "sc-consumer-grp" };
+            _producerConfig = producerConfig;
+            _consumerConfig = consumerConfig;
 
-            Producer = new KafkaProducer(_schemaRegistryConfig, _producerConfig);
-            Consumer = new KafkaConsumer(_schemaRegistryConfig, _consumerConfig);
+            Producer = producerConfig != null ? new KafkaProducer<T>(_schemaRegistryConfig, _producerConfig) : null;
+            Consumer = consumerConfig != null ? new KafkaConsumer<T>(_schemaRegistryConfig, _consumerConfig) : null;
         }
 
         public void Dispose()
