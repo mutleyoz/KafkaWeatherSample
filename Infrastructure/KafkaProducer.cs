@@ -2,34 +2,47 @@
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using System;
-using Weather.DTO;
+using Serilog;
 
 namespace Infrastructure
 {
-    public class KafkaProducer<T> : IDisposable where T : class
+    public class KafkaProducer<T> : KafkaBase<T>, IDisposable where T : class
     {
-        private SchemaRegistryConfig _schemaRegistryConfig;
         private ISchemaRegistryClient _schemaRegistryClient;
-
         private ProducerConfig _producerConfig;
-        private AvroSerializerConfig _avroSerializerConfig;
         private IProducer<string, T> _producer;
 
-
-        public KafkaProducer(SchemaRegistryConfig schemaRegistryConfig, ProducerConfig producerConfig )
+        public KafkaProducer(SchemaRegistryConfig schemaRegistryConfig, ProducerConfig producerConfig)
         {
-            _schemaRegistryConfig = schemaRegistryConfig;
             _producerConfig = producerConfig;
 
-            _avroSerializerConfig = new AvroSerializerConfig {BufferBytes = 100 };
+            var avroSerializerConfig = new AvroSerializerConfig {BufferBytes = 100 };
 
             _schemaRegistryClient = new CachedSchemaRegistryClient(schemaRegistryConfig);
 
             _producer =
                 new ProducerBuilder<string, T>(_producerConfig)
-                    .SetKeySerializer(new AvroSerializer<string>(_schemaRegistryClient, _avroSerializerConfig))
-                    .SetValueSerializer(new AvroSerializer<T>(_schemaRegistryClient, _avroSerializerConfig))
+                    .SetKeySerializer(new AvroSerializer<string>(_schemaRegistryClient, avroSerializerConfig))
+                    .SetValueSerializer(new AvroSerializer<T>(_schemaRegistryClient, avroSerializerConfig))
                     .Build();
+
+            Log.Information($"{nameof(KafkaProducer<T>)} initialised");
+        }
+
+        public override void Send(string topic, string key, T message)
+        {
+
+            Log.Information($"{nameof(KafkaProducer<T>)} - Sending {message}");
+
+            _producer
+                    .ProduceAsync(topic, new Message<string, T> { Key = key, Value = message })
+                    .ContinueWith(task =>
+                    {
+                        if (task.IsFaulted)
+                        { 
+                            Log.Error($"{nameof(KafkaProducer<T>)} error : {task.Exception.InnerException}");
+                        }
+                    });
         }
 
         public void Dispose()
@@ -37,23 +50,5 @@ namespace Infrastructure
             _schemaRegistryClient.Dispose();
             _producer.Dispose();
         }
-
-        public void Send(string topic, string key, T message)
-        {
-            _producer
-                    .ProduceAsync(topic, new Message<string, T> { Key = key, Value = message })
-                    .ContinueWith(task =>
-                    {
-                        if (!task.IsFaulted)
-                        {
-                            Console.WriteLine($"produced to: {task.Result.TopicPartitionOffset}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"error producing message: {task.Exception.InnerException}");
-                        }
-                    });
-        }
-
     }
 }

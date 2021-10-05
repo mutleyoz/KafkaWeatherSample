@@ -9,6 +9,8 @@
     <PackageReference Include="Confluent.Kafka" Version="1.8.1" />
     <PackageReference Include="Confluent.SchemaRegistry" Version="1.8.1" />
     <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="1.8.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>

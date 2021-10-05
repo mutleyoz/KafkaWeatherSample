@@ -21,20 +21,12 @@ namespace Weather.Consumer
                 AllowAutoCreateTopics = true
             };
 
-            var schemaRegistryConfig = new SchemaRegistryConfig
-            {
-                Url = "localhost:8081"
-            };
-
-            var avroSerializerConfig = new AvroSerializerConfig
-            {
-                // optional Avro serializer properties:
-                BufferBytes = 100
-            };
+            var schemaRegistryConfig = new SchemaRegistryConfig { Url = "localhost:8081" };
+            var avroSerializerConfig = new AvroSerializerConfig { BufferBytes = 100 };
 
             CancellationTokenSource cts = new CancellationTokenSource();
 
-            var kafkaClient = new KafkaClient<WeatherRecord>(schemaRegistryConfig, null, consumerConfig);
+            var kafkaClient = new KafkaClient<WeatherRecord>(schemaRegistryConfig, consumerConfig);
             kafkaClient.Consumer.Subscribe("weather").Listen(cts, msg =>
             {
                 var serializedResult = JsonSerializer.Serialize(msg);

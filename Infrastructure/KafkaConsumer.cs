@@ -7,21 +7,17 @@ using System.Threading;
 
 namespace Infrastructure
 {
-    public class KafkaConsumer<T> : IDisposable where T : class
+    public class KafkaConsumer<T> : KafkaBase<T>, IDisposable where T : class
     {
-        private SchemaRegistryConfig _schemaRegistryConfig;
         private ISchemaRegistryClient _schemaRegistryClient;
-        private ConsumerConfig _consumerConfig;
         private IConsumer<string, T> _consumer;
 
         public KafkaConsumer(SchemaRegistryConfig schemaRegistryConfig, ConsumerConfig consumerConfig)
         {
-            _schemaRegistryConfig = schemaRegistryConfig;
-            _consumerConfig = consumerConfig;
-            _schemaRegistryClient = new CachedSchemaRegistryClient(_schemaRegistryConfig);
+            _schemaRegistryClient = new CachedSchemaRegistryClient(schemaRegistryConfig);
 
             _consumer =
-                new ConsumerBuilder<string, T>(_consumerConfig)
+                new ConsumerBuilder<string, T>(consumerConfig)
                     .SetKeyDeserializer(new AvroDeserializer<string>(_schemaRegistryClient).AsSyncOverAsync())
                     .SetValueDeserializer(new AvroDeserializer<T>(_schemaRegistryClient).AsSyncOverAsync())
                     .SetErrorHandler((_, e) => Console.WriteLine($"Consumer Error: {e.Reason}"))
@@ -34,8 +30,7 @@ namespace Infrastructure
             return (this);
         }
 
-
-        public void Listen(CancellationTokenSource cts, Action<T> consumeEvent)
+        public override void Listen(CancellationTokenSource cts, Action<T> consumeEvent)
         {
             while (true)
             {

@@ -7,20 +7,22 @@ namespace Infrastructure
     public class KafkaClient<T> : IDisposable where T : class
     {
         private readonly SchemaRegistryConfig _schemaRegistryConfig;
-        private readonly ProducerConfig _producerConfig;
-        private readonly ConsumerConfig _consumerConfig;
 
         public KafkaConsumer<T> Consumer { get; set; }
         public KafkaProducer<T> Producer { get; init; }
 
-        public KafkaClient(SchemaRegistryConfig schemaRegistryConfig, ProducerConfig producerConfig = null, ConsumerConfig consumerConfig = null)
+        public KafkaClient(SchemaRegistryConfig schemaRegistryConfig, ProducerConfig producerConfig = null )
         {
             _schemaRegistryConfig = schemaRegistryConfig ?? new SchemaRegistryConfig { Url = "localhost:8081" };
-            _producerConfig = producerConfig;
-            _consumerConfig = consumerConfig;
 
-            Producer = producerConfig != null ? new KafkaProducer<T>(_schemaRegistryConfig, _producerConfig) : null;
-            Consumer = consumerConfig != null ? new KafkaConsumer<T>(_schemaRegistryConfig, _consumerConfig) : null;
+            Producer = producerConfig != null ? new KafkaProducer<T>(_schemaRegistryConfig, producerConfig) : null;
+        }
+
+        public KafkaClient(SchemaRegistryConfig schemaRegistryConfig, ConsumerConfig consumerConfig = null)
+        {
+            _schemaRegistryConfig = schemaRegistryConfig ?? new SchemaRegistryConfig { Url = "localhost:8081" };
+
+            Consumer = consumerConfig != null ? new KafkaConsumer<T>(_schemaRegistryConfig, consumerConfig) : null;
         }
 
         public void Dispose()
